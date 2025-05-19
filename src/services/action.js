@@ -13,5 +13,6 @@ export const apiGetWeather = async (idArg) => {
 
     } catch (error) {
         console.log('error en servico getAll')
+        throw error;
     }
 };
