@@ -191,7 +191,7 @@ const WeatherDashboard = () => {
       console.log('data para graficas --> ',dataArg);
       const dailyData = {};
       dataArg.list.forEach(item => {
-        const [date, time] = item.dt_txt.split(' ');
+        const [date] = item.dt_txt.split(' ');
 
         if (!dailyData[date]) {
           dailyData[date] = {
@@ -214,7 +214,6 @@ const WeatherDashboard = () => {
           const minTemp = Math.min(...data.temps);
           const maxTemp = Math.max(...data.temps);
           const avgWind = data.windSpeeds.reduce((a, b) => a + b, 0) / data.windSpeeds.length;
-          const avgHumidity = data.humidities.reduce((a, b) => a + b, 0) / data.humidities.length;
 
           return {
             name: data.name,
