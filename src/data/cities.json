@@ -1,0 +1,162 @@
+[
+  {
+    "estado": "Aguascalientes",
+    "capital": "Aguascalientes",
+    "id": 4019233
+  },
+  {
+    "estado": "Baja California",
+    "capital": "Mexicali",
+    "id": 3996069
+  },
+  {
+    "estado": "Baja California Sur",
+    "capital": "La Paz",
+    "id": 6942826
+  },
+  {
+    "estado": "Campeche",
+    "capital": "San Francisco de Campeche",
+    "id": 3531732
+  },
+  {
+    "estado": "Chiapas",
+    "capital": "Tuxtla Gutiérrez",
+    "id": 3515001
+  },
+  {
+    "estado": "Chihuahua",
+    "capital": "Chihuahua",
+    "id": 4014338
+  },
+  {
+    "estado": "CDMX",
+    "capital": "Ciudad de México",
+    "id": 3995465
+  },
+  {
+    "estado": "Coahuila",
+    "capital": "Saltillo",
+    "id": 3988086
+  },
+  {
+    "estado": "Colima",
+    "capital": "Colima",
+    "id": 4003626
+  },
+  {
+    "estado": "Durango",
+    "capital": "Victoria de Durango",
+    "id": 4011743
+  },
+  {
+    "estado": "Estado de México",
+    "capital": "Toluca",
+    "id": 3515302
+  },
+  {
+    "estado": "Guanajuato",
+    "capital": "Guanajuato",
+    "id": 4005270
+  },
+  {
+    "estado": "Guerrero",
+    "capital": "Chilpancingo",
+    "id": 3530870
+  },
+  {
+    "estado": "Hidalgo",
+    "capital": "Pachuca",
+    "id": 3515909
+  },
+  {
+    "estado": "Jalisco",
+    "capital": "Guadalajara",
+    "id": 4005539
+  },
+  {
+    "estado": "Michoacán",
+    "capital": "Morelia",
+    "id": 3995402
+  },
+  {
+    "estado": "Morelos",
+    "capital": "Cuernavaca",
+    "id": 3522961
+  },
+  {
+    "estado": "Nayarit",
+    "capital": "Tepic",
+    "id": 3981941
+  },
+  {
+    "estado": "Nuevo León",
+    "capital": "Monterrey",
+    "id": 3995465
+  },
+  {
+    "estado": "Oaxaca",
+    "capital": "Oaxaca de Juárez",
+    "id": 3522507
+  },
+  {
+    "estado": "Puebla",
+    "capital": "Puebla de Zaragoza",
+    "id": 3514051
+  },
+  {
+    "estado": "Querétaro",
+    "capital": "Santiago de Querétaro",
+    "id": 3991164
+  },
+  {
+    "estado": "Quintana Roo",
+    "capital": "Chetumal",
+    "id": 3531023
+  },
+  {
+    "estado": "San Luis Potosí",
+    "capital": "San Luis Potosí",
+    "id": 3985606
+  },
+  {
+    "estado": "Sinaloa",
+    "capital": "Culiacán",
+    "id": 4012176
+  },
+  {
+    "estado": "Sonora",
+    "capital": "Hermosillo",
+    "id": 3517742
+  },
+  {
+    "estado": "Tabasco",
+    "capital": "Villahermosa",
+    "id": 3517742
+  },
+  {
+    "estado": "Tamaulipas",
+    "capital": "Ciudad Victoria",
+    "id": 3517742
+  },
+  {
+    "estado": "Tlaxcala",
+    "capital": "Tlaxcala de Xicohténcatl",
+    "id": 3517742
+  },
+  {
+    "estado": "Veracruz",
+    "capital": "Xalapa",
+    "id": 3523349
+  },
+  {
+    "estado": "Yucatán",
+    "capital": "Mérida",
+    "id": 3523349
+  },
+  {
+    "estado": "Zacatecas",
+    "capital": "Zacatecas",
+    "id": 3979844
+  }
+]
