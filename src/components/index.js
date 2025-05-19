@@ -56,174 +56,36 @@ const WeatherDashboard = () => {
 
   const [dataAddCity, setDAtaAddCity] = useState([]);
 
+  const [datailHeaderCity, setDataHeaderCity] = useState({})
+
   const [
     isDisabledCoreMessages, 
     setIsDisabledCoreMessages
   ] = useState(true);
 
   const onSearchityData = async () => {
-    console.log('dato a buscar -->',query)
-      const dataCity = await DataCities;
-      console.log('allData filter --> ',dataCity)
-      const resultado = dataCity.filter(item =>
-        item.estado.toLowerCase() === query.toLowerCase() ||
-        item.capital.toLowerCase() === query.toLowerCase()
-      );
-      setDAtaAddCity(resultado[0]);
+    const dataCity = await DataCities;
+    const resultado = dataCity.filter(item =>
+      item.estado.toLowerCase() === query.toLowerCase() ||
+      item.capital.toLowerCase() === query.toLowerCase()
+    );
+    setDAtaAddCity(resultado[0]);
+    let idCuntryArg = resultado[0].id
+    const response = await apiGetWeather(idCuntryArg);
+    console.log('data en pantalla busqueda --> ',response.data)
 
-
-      console.log('data para buscar -->',resultado)
-      let idCuntryArg = resultado[0].id
-      console.log('id para servicio --> ',idCuntryArg)
-      const response = await apiGetWeather(idCuntryArg);
-      console.log('data en pantalla --> ',response.data)
-
-      if (response.data.cod === 200 || 
-        response.data.cod === '200'
-      ) {
-
-        const dailyData = {};
-        response.data.list.forEach(item => {
-          const [date, time] = item.dt_txt.split(' ');
-
-          if (!dailyData[date]) {
-            dailyData[date] = {
-              name: new Date(date).toLocaleDateString('es-ES', { weekday: 'short' }),
-              temps: [],
-              windSpeeds: [],
-              humidities: []
-            };
-          }
-
-          dailyData[date].temps.push(item.main.temp);
-          dailyData[date].windSpeeds.push(item.wind.speed);
-          dailyData[date].humidities.push(item.main.humidity);
-        });
-
-        // Transformar al formato del gráfico
-        const chartData = Object.entries(dailyData)
-          .slice(0, 5)
-          .map(([date, data]) => {
-            const minTemp = Math.min(...data.temps);
-            const maxTemp = Math.max(...data.temps);
-            const avgWind = data.windSpeeds.reduce((a, b) => a + b, 0) / data.windSpeeds.length;
-            const avgHumidity = data.humidities.reduce((a, b) => a + b, 0) / data.humidities.length;
-
-            return {
-              name: data.name,
-              uv: Math.round(minTemp * 100), // Temperatura mínima (escala 100)
-              pv: Math.round(maxTemp * 100), // Temperatura máxima (escala 100)
-              amt: Math.round(avgWind * 100) // Velocidad de viento promedio (opcional)
-            };
-          });
-        console.log('data para grafica --> ',chartData)
-        setTempsDay(chartData)
-
-
-        /** seccion en donde se impremen grado pero no se ve en las graficas */
-        //const dataDeailCitySearch = await detailWeatherCity(response.data);
-        //console.log('detail detail data --> ',dataDeailCitySearch);
-
-        // const dailyData = {};
-    
-        // dataDeailCitySearch.pronostico.forEach(item => {
-        //   // Extraer la fecha (sin la hora)
-        //   const date = item.fecha.split(' ')[0];
-          
-        //   // Convertir temperaturas a números
-        //   const tempMax = parseFloat(item.temperatura.maxima);
-        //   const tempMin = parseFloat(item.temperatura.minima);
-          
-        //   // Si el día no existe en el objeto, inicializarlo
-        //   if (!dailyData[date]) {
-        //       dailyData[date] = {
-        //           date: date,
-        //           tempMax: tempMax,
-        //           tempMin: tempMin,
-        //           count: 1
-        //       };
-        //   } else {
-        //       // Actualizar máximas y mínimas
-        //       if (tempMax > dailyData[date].tempMax) {
-        //           dailyData[date].tempMax = tempMax;
-        //       }
-        //       if (tempMin < dailyData[date].tempMin) {
-        //           dailyData[date].tempMin = tempMin;
-        //       }
-        //       dailyData[date].count++;
-        //   }
-        // });
-    
-        // // Convertir a array y limitar a 5 días
-        // const chartData = Object.values(dailyData)
-        //     .sort((a, b) => a.date.localeCompare(b.date))
-        //     .slice(0, 5)
-        //     .map((day, index) => ({
-        //         name: `Día ${index + 1} (${day.date})`,
-        //         tempMax: day.tempMax,
-        //         tempMin: day.tempMin,
-        //         date: day.date
-        //     }));
-
-        // console.log('data para grafica --> ',chartData)
-        //setTempsDay(chartData)
-        
-
-
-        setIsDisabledCoreMessages(false)
-        setTimeout(() => {
-          setIsLoader(false)
-        },1000);
-      }
-  }
-
-  const kelvinToCelsius = (kelvin) => {
-    return (kelvin - 273.15).toFixed(2);
-  }
-
-  const detailWeatherCity = (data) => {
-    try {
-      const weatherData = [];
-      data.list.forEach(item => {
-          const weatherInfo = {
-              fecha: item.dt_txt,
-              temperatura: {
-                  actual: kelvinToCelsius(item.main.temp),
-                  sensacion: kelvinToCelsius(item.main.feels_like),
-                  minima: kelvinToCelsius(item.main.temp_min),
-                  maxima: kelvinToCelsius(item.main.temp_max)
-              },
-              humedad: item.main.humidity,
-              viento: {
-                  velocidad: item.wind.speed,
-                  direccion: item.wind.deg,
-                  rafaga: item.wind.gust || 0 // Algunos items pueden no tener gust
-              },
-              nubes: item.clouds.all,
-              clima: {
-                  descripcion: item.weather[0].description,
-                  icono: item.weather[0].icon
-              },
-              lluvia: item.rain ? item.rain['3h'] || 0 : 0 // mm en las últimas 3 horas
-          };
-          
-          weatherData.push(weatherInfo);
-      });
-      
-      return {
-          ciudad: data.city.name,
-          pais: data.city.country,
-          coordenadas: {
-              latitud: data.city.coord.lat,
-              longitud: data.city.coord.lon
-          },
-          pronostico: weatherData
-      };
-    } catch (error) {
-      console.log('error a extraer dataDetail -->',error);
-      throw error;
+    if (response.data.cod === 200 || 
+      response.data.cod === '200'
+    ) {
+      onGetAllWeather(response.data);
+      onGetDetailCityWeather(response.data);
+      setIsDisabledCoreMessages(false)
+      setQuery('')
+      setTimeout(() => {
+        setIsLoader(false)
+      },1000);
     }
-  }
+  };
 
   const onAddCity = async (idCityArg, nameArg) => {
     try {
@@ -237,7 +99,8 @@ const WeatherDashboard = () => {
         },2000)
 
     } catch (error) {
-      console.log('error al agregar ciudad pantalla',error)
+      console.log('error al agregar ciudad pantalla',error);
+      throw error;
     };
   }
 
@@ -250,7 +113,6 @@ const WeatherDashboard = () => {
       } else {
         setFavorites([])
       }
-
     } catch (error) {
       console.log('error a gargar lista pantalla')
       throw error
@@ -277,22 +139,58 @@ const WeatherDashboard = () => {
   const onGetCitiesSuggestion = async () => {
     try {
       const response = await DataCities
-      console.log('lee data de funcion --> ',response)
       setAllCities(response)
     } catch (error) {
       console.log('error a cargar sugerencias ')
+      throw error;
     }
   };
 
-  const onGetAllWeather = async () => {
-    try { 
-      const idCuntry = '3530597';
-      const response = await apiGetWeather(idCuntry);
-      console.log('data en pantalla --> ',response.data)
+  const onGetDetailCityWeather = async (data) => {
+    try {
+      console.log('data detail --> ',data)
+      const today = new Date().toISOString().split("T")[0];
+    
+      const todayEntries = data.list.filter(item => item.dt_txt.includes(today));
+      
+      if (todayEntries.length === 0) return null;
+    
+      const avgTemp = todayEntries.reduce((sum, item) => sum + item.main.temp, 0) / todayEntries.length;
+      const avgFeelsLike = todayEntries.reduce((sum, item) => sum + item.main.feels_like, 0) / todayEntries.length;
+      const avgHumidity = todayEntries.reduce((sum, item) => sum + item.main.humidity, 0) / todayEntries.length;
+      const avgWind = todayEntries.reduce((sum, item) => sum + item.wind.speed, 0) / todayEntries.length;
+      const avgClouds = todayEntries.reduce((sum, item) => sum + item.clouds.all, 0) / todayEntries.length;
 
-      // Crear un mapa por fecha (solo fecha sin hora)
+      const tempCelsius = Math.round(avgTemp - 273.15);
+      const feelsLikeCelsius = Math.round(avgFeelsLike - 273.15);
+
+      const windKmh = Math.round(avgWind * 3.6);
+    
+      const dataDetailWeather = {
+        city: data.city.name,
+        date: today,
+        temperature: tempCelsius,
+        feelsLike: feelsLikeCelsius,
+        humidity: Math.round(avgHumidity),
+        windSpeed: windKmh,
+        clouds: Math.round(avgClouds),
+        description: todayEntries[0].weather[0].description
+      }; 
+
+      console.log('data detail weather --> ',dataDetailWeather);
+      setDataHeaderCity(dataDetailWeather);
+
+    } catch (error) {
+      console.log('error al cargar detalle --> ',error)
+      throw error;
+    }
+  };
+
+  const onGetAllWeather = async (dataArg) => {
+    try { 
+      console.log('data para graficas --> ',dataArg);
       const dailyData = {};
-      response.data.list.forEach(item => {
+      dataArg.list.forEach(item => {
         const [date, time] = item.dt_txt.split(' ');
 
         if (!dailyData[date]) {
@@ -327,7 +225,6 @@ const WeatherDashboard = () => {
         });
       console.log('data para grafica --> ',chartData)
       setTempsDay(chartData)
-
       setTimeout(() => {
         setIsLoader(false);
       },3000)
@@ -357,60 +254,29 @@ const WeatherDashboard = () => {
     setSuggestions([]);
   };
 
-  const handleSelect = (dataArg) => {
-    console.log('data de ciudad -->',dataArg)
-    setSelectedCity(dataArg);
-    onSearchityData(dataArg);
-  }
-
-  console.log('data seleccioanda --> ',selectedCity)
-  console.log('data sugerida --> ',suggestions)
-  console.log('query --> ',query)
-
-  const dataChart = [
-    {
-      name: 'Page A',
-      uv: 4000,
-      pv: 2400,
-      amt: 2400,
-    },
-    {
-      name: 'Page B',
-      uv: 3000,
-      pv: 1398,
-      amt: 2210,
-    },
-    {
-      name: 'Page C',
-      uv: 2000,
-      pv: 9800,
-      amt: 2290,
-    },
-    {
-      name: 'Page D',
-      uv: 2780,
-      pv: 3908,
-      amt: 2000,
-    },
-    {
-      name: 'Page E',
-      uv: 1890,
-      pv: 4800,
-      amt: 2181,
-    },
-    {
-      name: 'Page F',
-      uv: 2390,
-      pv: 3800,
-      amt: 2500,
-    },
-    {
-      name: 'Page G',
-      uv: 3490,
-      pv: 4300,
-      amt: 2100,
-    },
-  ];
+  const handleSelect = async (idCity) => {
+    try {
+    console.log('data de ciudad -->',idCity)
+    setSelectedCity(idCity);
+    
+    const response = await apiGetWeather(idCity);
+    console.log('data en pantalla lista favoritos --> ',response.data);
+      if (response.data.cod === 200 || 
+        response.data.cod === '200'
+      ) {
+        onGetAllWeather(response.data);
+        onGetDetailCityWeather(response.data);
+        setIsDisabledCoreMessages(false);
+        setQuery('');
+        setTimeout(() => {
+          setIsLoader(false);
+        },1000);
+      }
+    } catch (error) {
+      console.log('error al buscar ciudad agregada lista favoritos -->',error)
+      throw error;
+    }
+  };
 
   const onMessageInformation = () => {
     return (
@@ -449,7 +315,6 @@ const WeatherDashboard = () => {
     execudedRed.current = true;
     onGetCitiesSuggestion();
     onGetLsitFavoriteCity();
-
     setTimeout(() => {
       setIsLoader(false);
     },3000)
@@ -522,18 +387,10 @@ const WeatherDashboard = () => {
                         <div className="flex justify-between items-start">
                           <div>
                             <h1 className="text-2xl font-bold text-gray-900">
-                              Madrid
+                              {datailHeaderCity.city}
                             </h1>
                             <p className="text-gray-500">
-                              Miércoles, 15 Mayo
-                            </p>
-                          </div>
-                          <div className="flex items-center">
-                            <h2 className="text-5xl font-bold text-gray-900">
-                              24°
-                            </h2>
-                            <p className="text-xl text-gray-500">
-                              Soleado
+                              {datailHeaderCity.date}
                             </p>
                           </div>
                         </div>
@@ -550,7 +407,7 @@ const WeatherDashboard = () => {
                                   Sensación
                                 </p>
                                 <p className="text-gray-900 font-medium">
-                                  26°
+                                  {`${datailHeaderCity.temperature} °`}
                                 </p>
                               </div>
                             </div>
@@ -563,7 +420,7 @@ const WeatherDashboard = () => {
                                   Viento
                                 </p>
                                 <p className="text-gray-900 font-medium">
-                                  12 km/h
+                                  {`${datailHeaderCity.windSpeed} km/h`} 
                                 </p>
                               </div>
                             </div>
@@ -576,7 +433,7 @@ const WeatherDashboard = () => {
                                   Humedad
                                 </p>
                                 <p className="text-gray-900 font-medium">
-                                  45%
+                                  {`${datailHeaderCity.humidity}`}
                                 </p>
                               </div>
                             </div>
@@ -589,7 +446,7 @@ const WeatherDashboard = () => {
                                   Nubes
                                 </p>
                                 <p className="text-gray-900 font-medium">
-                                  10%
+                                  {datailHeaderCity.feelsLike}
                                 </p>
                               </div>
                             </div>
@@ -694,7 +551,10 @@ const WeatherDashboard = () => {
                           >
                             <button 
                               className="text-gray-900 text-left flex-grow hover:text-blue-600"
-                              onClick={() => handleSelect(city)}
+                              onClick={() => {
+                                setIsLoader(true);
+                                handleSelect(city.id);
+                              }}
                             >
                               {city.name}
                             </button>
