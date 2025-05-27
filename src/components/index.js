@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 
 import Loader from './loader/loader';
+import Error404 from './error/error404';
 import { apiGetWeather } from '../services/action';
 import { 
   saveCity,
@@ -42,6 +43,8 @@ const WeatherDashboard = () => {
 
   const [isLoader, setIsLoader] = useState(true);
 
+  const [isError404, setIsError404] = useState(false);
+
 
   const [allCities, setAllCities] = useState([]);
   const [query, setQuery] = useState("");
@@ -64,27 +67,42 @@ const WeatherDashboard = () => {
   ] = useState(true);
 
   const onSearchityData = async () => {
-    const dataCity = await DataCities;
-    const resultado = dataCity.filter(item =>
-      item.estado.toLowerCase() === query.toLowerCase() ||
-      item.capital.toLowerCase() === query.toLowerCase()
-    );
-    setDAtaAddCity(resultado[0]);
-    let idCuntryArg = resultado[0].id
-    const response = await apiGetWeather(idCuntryArg);
-    console.log('data en pantalla busqueda --> ',response.data)
+    try {
+      const dataCity = await DataCities;
+      const resultado = dataCity.filter(item =>
+        item.estado.toLowerCase() === query.toLowerCase() ||
+        item.capital.toLowerCase() === query.toLowerCase()
+      );
+      setDAtaAddCity(resultado[0]);
+      let idCuntryArg = resultado[0].id
+      const response = await apiGetWeather(idCuntryArg);
+      console.log('data en pantalla busqueda --> ',response.data)
 
-    if (response.data.cod === 200 || 
-      response.data.cod === '200'
-    ) {
-      onGetAllWeather(response.data);
-      onGetDetailCityWeather(response.data);
-      setIsDisabledCoreMessages(false)
-      setQuery('')
+      if (response.data.cod === 200 || 
+        response.data.cod === '200'
+      ) {
+        onGetAllWeather(response.data);
+        onGetDetailCityWeather(response.data);
+        setIsDisabledCoreMessages(false);
+        setIsError404(false);
+        setQuery('')
+        setTimeout(() => {
+          setIsLoader(false)
+        },1000);
+      }
+
+    } catch (error) {
+      setIsDisabledCoreMessages(false);
+      setIsError404(true);
+      setQuery('');
+
       setTimeout(() => {
         setIsLoader(false)
-      },1000);
+      },2000)
+      console.error('entro al error ',error) 
+      //throw error
     }
+
   };
 
   const onAddCity = async (idCityArg, nameArg) => {
@@ -255,11 +273,12 @@ const WeatherDashboard = () => {
 
   const handleSelect = async (idCity) => {
     try {
-    console.log('data de ciudad -->',idCity)
-    setSelectedCity(idCity);
-    
-    const response = await apiGetWeather(idCity);
-    console.log('data en pantalla lista favoritos --> ',response.data);
+      console.log('entro a donde *****---***',idCity)
+      console.log('data de ciudad -->',idCity)
+      setSelectedCity(idCity);
+      
+      const response = await apiGetWeather(idCity);
+      console.log('data en pantalla lista favoritos --> ',response.data);
       if (response.data.cod === 200 || 
         response.data.cod === '200'
       ) {
@@ -380,150 +399,156 @@ const WeatherDashboard = () => {
                     </form>
                   </div>
 
-                  {isDisabledCoreMessages ?  onMessageInformation() : (
-                    <>
-                      <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm mt-6">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <h1 className="text-2xl font-bold text-gray-900">
-                              {datailHeaderCity.city}
-                            </h1>
-                            <p className="text-gray-500">
-                              {datailHeaderCity.date}
-                            </p>
+                  {isDisabledCoreMessages ?  
+                    onMessageInformation() 
+                  : isError404 ? 
+                    <div className='pt-6'> 
+                      <Error404 />
+                    </div> 
+                   : (
+                      <>
+                        <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm mt-6">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <h1 className="text-2xl font-bold text-gray-900">
+                                {datailHeaderCity.city}
+                              </h1>
+                              <p className="text-gray-500">
+                                {datailHeaderCity.date}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="mt-6 space-y-6">
+                            {/* Temperature Display */}
+                            {/* Weather Stats Grid */}
+                            <div className="grid grid-cols-2 gap-4">
+                              {/* Feels Like */}
+                              <div className="flex items-center space-x-2">
+                                <Thermometer className="text-yellow-500 w-8 h-8" />
+                                <div>
+                                  <p className="text-gray-500 text-lg">
+                                    Sensación
+                                  </p>
+                                  <p className="text-gray-900 font-medium">
+                                    {`${datailHeaderCity.temperature} °`}
+                                  </p>
+                                </div>
+                              </div>
+                              
+                              {/* Wind */}
+                              <div className="flex items-center space-x-2">
+                                <Wind className="text-gray-700 w-8 h-8" />
+                                <div>
+                                  <p className="text-gray-500 text-lg">
+                                    Viento
+                                  </p>
+                                  <p className="text-gray-900 font-medium">
+                                    {`${datailHeaderCity.windSpeed} km/h`} 
+                                  </p>
+                                </div>
+                              </div>
+                              
+                              {/* Humidity */}
+                              <div className="flex items-center space-x-2">
+                                <Droplets className="text-blue-600 w-8 h-8" />
+                                <div>
+                                  <p className="text-gray-500 text-lg">
+                                    Humedad
+                                  </p>
+                                  <p className="text-gray-900 font-medium">
+                                    {`${datailHeaderCity.humidity}`}
+                                  </p>
+                                </div>
+                              </div>
+                              
+                              {/* Clouds */}
+                              <div className="flex items-center space-x-2">
+                                <Cloud className="text-gray-400 w-8 h-8" />
+                                <div>
+                                  <p className="text-gray-500 text-lg">
+                                    Nubes
+                                  </p>
+                                  <p className="text-gray-900 font-medium">
+                                    {datailHeaderCity.feelsLike}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
                           </div>
                         </div>
 
-                        <div className="mt-6 space-y-6">
-                          {/* Temperature Display */}
-                          {/* Weather Stats Grid */}
-                          <div className="grid grid-cols-2 gap-4">
-                            {/* Feels Like */}
-                            <div className="flex items-center space-x-2">
-                              <Thermometer className="text-yellow-500 w-8 h-8" />
-                              <div>
-                                <p className="text-gray-500 text-lg">
-                                  Sensación
-                                </p>
-                                <p className="text-gray-900 font-medium">
-                                  {`${datailHeaderCity.temperature} °`}
-                                </p>
-                              </div>
-                            </div>
-                            
-                            {/* Wind */}
-                            <div className="flex items-center space-x-2">
-                              <Wind className="text-gray-700 w-8 h-8" />
-                              <div>
-                                <p className="text-gray-500 text-lg">
-                                  Viento
-                                </p>
-                                <p className="text-gray-900 font-medium">
-                                  {`${datailHeaderCity.windSpeed} km/h`} 
-                                </p>
-                              </div>
-                            </div>
-                            
-                            {/* Humidity */}
-                            <div className="flex items-center space-x-2">
-                              <Droplets className="text-blue-600 w-8 h-8" />
-                              <div>
-                                <p className="text-gray-500 text-lg">
-                                  Humedad
-                                </p>
-                                <p className="text-gray-900 font-medium">
-                                  {`${datailHeaderCity.humidity}`}
-                                </p>
-                              </div>
-                            </div>
-                            
-                            {/* Clouds */}
-                            <div className="flex items-center space-x-2">
-                              <Cloud className="text-gray-400 w-8 h-8" />
-                              <div>
-                                <p className="text-gray-500 text-lg">
-                                  Nubes
-                                </p>
-                                <p className="text-gray-900 font-medium">
-                                  {datailHeaderCity.feelsLike}
-                                </p>
-                              </div>
-                            </div>
+                        <div className="w-full bg-white p-4 rounded-lg border border-gray-200 shadow-sm mt-6">
+                          <h3 className="text-gray-900 font-medium mb-4 text-lg">
+                            Temperaturas de los últimos 5 días
+                          </h3>
+                          
+                          {/* Contenedor con altura mínima garantizada */}
+                          <div className="w-full" style={{ height: '400px', minHeight: '400px' }}>
+                            <ResponsiveContainer width="100%" height="100%">
+                              <LineChart
+                                data={tempsDay}
+                                // data={dataChart}
+                                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                              >
+                                <CartesianGrid strokeDasharray="3 3" />
+                                <XAxis dataKey="name" />
+                                <YAxis />
+                                <Tooltip />
+                                <Legend />
+                                <Line 
+                                  type="monotone" 
+                                  dataKey="pv" 
+                                  stroke="#8884d8" 
+                                  activeDot={{ r: 8 }} 
+                                />
+                                <Line 
+                                  type="monotone" 
+                                  dataKey="uv" 
+                                  stroke="#82ca9d" 
+                                />
+                              </LineChart>
+                            </ResponsiveContainer>
                           </div>
+
+
+                          <div style={{ width: '100%', height: 400, display: 'none' }}>
+                            <ResponsiveContainer>
+                              <LineChart
+                                data={tempsDay}
+                                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                              >
+                                <CartesianGrid strokeDasharray="3 3" />
+                                <XAxis dataKey="name" />
+                                <YAxis label={{ value: 'Temperatura (°C)', angle: -90, position: 'insideLeft' }} />
+                                <Tooltip />
+                                <Legend />
+                                <Line type="monotone" dataKey="tempMax" name="Máxima" stroke="#ff7300" activeDot={{ r: 8 }} />
+                                <Line type="monotone" dataKey="tempMin" name="Mínima" stroke="#387908" />
+                              </LineChart>
+                            </ResponsiveContainer>
+                          </div>
+
+
+                          <div style={{ width: '100%', height: 400, display: 'none' }}>
+                            <ResponsiveContainer>
+                              <LineChart
+                                data={tempsDay}
+                                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                              >
+                                <CartesianGrid strokeDasharray="3 3" />
+                                <XAxis dataKey="name" />
+                                <YAxis label={{ value: 'Temperatura (°C)', angle: -90, position: 'insideLeft' }} />
+                                <Tooltip />
+                                <Legend />
+                                <Line type="monotone" dataKey="tempMax" name="Máxima" stroke="#ff7300" activeDot={{ r: 8 }} />
+                                <Line type="monotone" dataKey="tempWin" name="Mínima" stroke="#387908" />
+                              </LineChart>
+                            </ResponsiveContainer>
+                          </div>
+
                         </div>
-                      </div>
-
-                      <div className="w-full bg-white p-4 rounded-lg border border-gray-200 shadow-sm mt-6">
-                        <h3 className="text-gray-900 font-medium mb-4 text-lg">
-                          Temperaturas de los últimos 5 días
-                        </h3>
-                        
-                        {/* Contenedor con altura mínima garantizada */}
-                        <div className="w-full" style={{ height: '400px', minHeight: '400px' }}>
-                          <ResponsiveContainer width="100%" height="100%">
-                            <LineChart
-                              data={tempsDay}
-                              // data={dataChart}
-                              margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                            >
-                              <CartesianGrid strokeDasharray="3 3" />
-                              <XAxis dataKey="name" />
-                              <YAxis />
-                              <Tooltip />
-                              <Legend />
-                              <Line 
-                                type="monotone" 
-                                dataKey="pv" 
-                                stroke="#8884d8" 
-                                activeDot={{ r: 8 }} 
-                              />
-                              <Line 
-                                type="monotone" 
-                                dataKey="uv" 
-                                stroke="#82ca9d" 
-                              />
-                            </LineChart>
-                          </ResponsiveContainer>
-                        </div>
-
-
-                        <div style={{ width: '100%', height: 400, display: 'none' }}>
-                          <ResponsiveContainer>
-                            <LineChart
-                              data={tempsDay}
-                              margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                            >
-                              <CartesianGrid strokeDasharray="3 3" />
-                              <XAxis dataKey="name" />
-                              <YAxis label={{ value: 'Temperatura (°C)', angle: -90, position: 'insideLeft' }} />
-                              <Tooltip />
-                              <Legend />
-                              <Line type="monotone" dataKey="tempMax" name="Máxima" stroke="#ff7300" activeDot={{ r: 8 }} />
-                              <Line type="monotone" dataKey="tempMin" name="Mínima" stroke="#387908" />
-                            </LineChart>
-                          </ResponsiveContainer>
-                        </div>
-
-
-                        <div style={{ width: '100%', height: 400, display: 'none' }}>
-                          <ResponsiveContainer>
-                            <LineChart
-                              data={tempsDay}
-                              margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                            >
-                              <CartesianGrid strokeDasharray="3 3" />
-                              <XAxis dataKey="name" />
-                              <YAxis label={{ value: 'Temperatura (°C)', angle: -90, position: 'insideLeft' }} />
-                              <Tooltip />
-                              <Legend />
-                              <Line type="monotone" dataKey="tempMax" name="Máxima" stroke="#ff7300" activeDot={{ r: 8 }} />
-                              <Line type="monotone" dataKey="tempWin" name="Mínima" stroke="#387908" />
-                            </LineChart>
-                          </ResponsiveContainer>
-                        </div>
-
-                      </div>
-                    </>
+                      </>
                   )}
 
                 </div>
